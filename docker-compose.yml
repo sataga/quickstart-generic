@@ -1,0 +1,78 @@
+
+version: '2'
+services:
+    api:
+        image: screwdrivercd/screwdriver:stable
+        ports:
+            - 9001:80
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock:rw
+            - ./data/:/tmp/sd-data/:rw
+        environment:
+            PORT: 80
+            URI: http://192.168.3.20:9001
+            ECOSYSTEM_UI: http://192.168.3.20:9000
+            ECOSYSTEM_STORE: http://192.168.3.20:9002
+            DATASTORE_PLUGIN: sequelize
+            DATASTORE_SEQUELIZE_DIALECT: sqlite
+            DATASTORE_SEQUELIZE_STORAGE: /tmp/sd-data/storage.db
+            EXECUTOR_PLUGIN: docker
+            EXECUTOR_QUEUE_ENABLED: "false"
+            SECRET_WHITELIST: "[]"
+            EXECUTOR_DOCKER_DOCKER: |
+                {
+                    "socketPath": "/var/run/docker.sock"
+                }
+            SCM_SETTINGS: |
+                {
+                    "github": {
+                        "plugin": "github",
+                        "config": {"username": "sd-buildbot", "secret": "SUPER-SECRET-SIGNING-THING", "oauthClientSecret": "5c4ed9ae14a10aad433468553511becafde2f77d", "email": "dev-null@screwdriver.cd", "oauthClientId": "bc6f66d758828a08eba9"}
+                    }
+                }
+            SECRET_JWT_PRIVATE_KEY: |
+                -----BEGIN RSA PRIVATE KEY-----
+                MIICXQIBAAKBgQCbDYTkJUTNN+lgtWWutLsjk4mlhmxcg2JZdw4PuIvyXtDcLjJ3
+                ndRAcPfOdx13TwsMZWBrnZpPzkiyQaM2Bw9aIZPqCwLhqjph2UWU5xqUuprNR02j
+                l8U3HHGIdQJq86CH564fW4iHq6qHSSRpVB5Nv/DkOeaqlhrayHMkjsu5JwIDAQAB
+                AoGAJqFPoqfGZHqxom6PTt+oYEy51ouPI913+2I2FqSb+V62GqVH3ZVs9EEw/Deh
+                F8CRuBzp0OYLNCbo5cCEsUlBAYhZ61/bMxymWaKTYnpGvnQbDhz4ygt7VEmo8Ojg
+                qUUutgH+6MlaUZJSPDL2eGqQLGEE26JaQWVAYihRkOuTMUECQQDNWHmoZ0/AiGxi
+                7h+j54p1cfB2MjVGsJSk21WRDixpCgHgxp/chKuIEocjJqbon13XfAHrouwvyeb5
+                Ijba/B/7AkEAwU0Q5/X1IRyZoknVIG+8da1Hzp2kLyFuljwZxrReDspGjIjBd7EH
+                92IW5RpN4WO8VpBHqhyNHSnT8J8tNtHHxQJAXhE3ugOJr0NPk4pOCEGbVe3aH+sk
+                KLvffB3V9tstUPj6n0OeG+DSy0ThjyK3tzy6OmpeXtmFpOay3lHkGzEAXQJBAKpW
+                10cRn2oGYfx5Q67JyDGK+XRBxqUhuOn7HFvWJeyyo2jEOnjXMEX30mUhwO+VjCpc
+                CksFzfSdH38zRgzA4GECQQCbMgPoUEYaSJBYKQvRdxzKzu+8obVWR07ACfEz106Z
+                mWrCF3lLbvhBoICCzJ88mHoSHPu7oQ1s8uRlrVeYZ7EM
+                -----END RSA PRIVATE KEY-----
+            SECRET_JWT_PUBLIC_KEY: |
+                -----BEGIN PUBLIC KEY-----
+                MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCbDYTkJUTNN+lgtWWutLsjk4ml
+                hmxcg2JZdw4PuIvyXtDcLjJ3ndRAcPfOdx13TwsMZWBrnZpPzkiyQaM2Bw9aIZPq
+                CwLhqjph2UWU5xqUuprNR02jl8U3HHGIdQJq86CH564fW4iHq6qHSSRpVB5Nv/Dk
+                OeaqlhrayHMkjsu5JwIDAQAB
+                -----END PUBLIC KEY-----
+    ui:
+        image: screwdrivercd/ui:stable
+        ports:
+            - 9000:80
+        environment:
+            ECOSYSTEM_API: http://192.168.3.20:9001
+            ECOSYSTEM_STORE: http://192.168.3.20:9002
+            AVATAR_HOSTNAME: avatars*.githubusercontent.com
+
+    store:
+        image: screwdrivercd/store:stable
+        ports:
+            - 9002:80
+        environment:
+            ECOSYSTEM_UI: http://192.168.3.20:9000
+            URI: http://192.168.3.20:9002
+            SECRET_JWT_PUBLIC_KEY: |
+                -----BEGIN PUBLIC KEY-----
+                MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCbDYTkJUTNN+lgtWWutLsjk4ml
+                hmxcg2JZdw4PuIvyXtDcLjJ3ndRAcPfOdx13TwsMZWBrnZpPzkiyQaM2Bw9aIZPq
+                CwLhqjph2UWU5xqUuprNR02jl8U3HHGIdQJq86CH564fW4iHq6qHSSRpVB5Nv/Dk
+                OeaqlhrayHMkjsu5JwIDAQAB
+                -----END PUBLIC KEY-----
